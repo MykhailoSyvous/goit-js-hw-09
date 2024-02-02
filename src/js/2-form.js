@@ -1,50 +1,52 @@
+const form = document.querySelector(".feedback-form");
+const storageKey = "feedback-form-state";
 
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
+
+form.addEventListener("input", () => {
+    const userEmail = form.elements.email.value.trim();
+    const userMessage = form.elements.message.value.trim();
+    
+    const userData = {
+        email: userEmail,
+        message: userMessage,
+    }
+
+    saveToLocalStorege(storageKey, userData);
+});
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault(); 
+    const data = loadFromLocalStorege(storageKey) || {};
+    if (data.email === "" || data.message === "") {
+        alert("All form fields must be filled in");
+        return;
+    }
+     console.log(data);
+    form.reset();
+    localStorage.removeItem(storageKey);
+});
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('.feedback-form');
-  
-    
-    form.addEventListener('input', (event) => {
-      const { name, value } = event.target;
-      const formData = JSON.parse(localStorage.getItem('feedback-form-state')) || {};
-  
-      
-      formData[name] = value.trim();
-  
-      
-      localStorage.setItem('feedback-form-state', JSON.stringify(formData));
-    });
-  
-    
-    const storedData = JSON.parse(localStorage.getItem('feedback-form-state')) || {};
-    Object.entries(storedData).forEach(([name, value]) => {
-      const input = form.querySelector(`[name="${name}"]`);
-      if (input) {
-        input.value = value;
-      }
-    });
-  
-    
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-  
-      const formData = JSON.parse(localStorage.getItem('feedback-form-state')) || {};
-  
-      
-      if (formData.email && formData.message) {
-        
-        console.log({
-          email: formData.email,
-          message: formData.message,
-        });
-  
-        
-        localStorage.removeItem('feedback-form-state');
-        form.reset();
-      }
-    });
-  });
-  
+function saveToLocalStorege(key, value) {
+    const toJSON = JSON.stringify(value);
+    localStorage.setItem(key,toJSON);
+}
+
+function loadFromLocalStorege(key) {
+    const fromJSON = localStorage.getItem(key);;
+    try {
+        const result = JSON.parse(fromJSON);
+        return result;
+    }
+    catch {
+        return "ERROR"; 
+    }  
+}
+
+function restartedPage() {
+    const data = loadFromLocalStorege(storageKey) || {};
+    form.elements.email.value = data.email || "";
+    form.elements.message.value = data.message || "";
+}
+
+restartedPage();
